@@ -169,6 +169,7 @@ function getsources() {
         var pic = document.createElement("img");
     var path= data.movie_results[0].poster_path;
     var imagelink= "https://image.tmdb.org/t/p/w200"+ path;
+    console.log(imagelink);
     pic.src = imagelink;
     moviebox.appendChild(pic)}
         
