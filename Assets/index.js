@@ -4,12 +4,14 @@ const errormessage = document.getElementById("errormessage");
 const suboptions = document.getElementById("suboptions");
 const subheading = document.getElementById("subheading");
 const suberror = document.getElementById("suberror");
-const rentoptions = document.getElementById("rentoptions");
-const rentheading = document.getElementById("rentheading");
-const renterror = document.getElementById("renterror");
-const buyoptions = document.getElementById("buyoptions");
-const buyheading = document.getElementById("buyheading");
-const buyerror = document.getElementById("buyerror");
+const moviebox=document.getElementById("moviebox")
+//const rentoptions = document.getElementById("rentoptions");
+//const rentheading = document.getElementById("rentheading");
+//const renterror = document.getElementById("renterror");
+//const buyoptions = document.getElementById("buyoptions");
+//const buyheading = document.getElementById("buyheading");
+//const buyerror = document.getElementById("buyerror");
+
 
 
 //Takes Movie Title submitted by user and returns Watchmode Api numerical ID for submitted movie
@@ -28,11 +30,10 @@ function getId(query, type) {
         .then(response => response.json())
         .then((data) => {
             if (data.title_results.length != 0) {
-                //console.log(data);
-                //console.log(data.title_results);
                 let id = data.title_results[0].id;
                 console.log(id);
                 getStreaminginfo(id)
+                getpicture(data.title_results[0].imdb_id)
                 /*If Watchmode does not have the movie title (and thus its ID) in its database, that means it does not have any streaming options. This throws an error telling user to pick a different movie*/
                 /*You can test this by inputting a movie that does not exist*/
             } else throw Error('No movie found by that name');
@@ -55,13 +56,12 @@ function getStreaminginfo(id) {
     })
         .then(response => response.json())
         .then((data) => {
-            console.log(data)
             /*Checks to make sure the Watchmode API has any streaming options available for the chosen movie in its database*/
             /*For example, Watchmode has the movie Neo Ned in its database, has an ID for it, but has no streaming links for it available (no subscription, rental or buying options)*/
             if (data.length != 0) {
                 rendersubdata(data)
-                renderrentdata(data)
-                renderbuydata(data)
+                //renderrentdata(data)
+                //renderbuydata(data)
             } else { errormessage.textContent = "No Streaming Options Found! Please try searching for a different movie." }
         })
         .catch(err => {
@@ -97,8 +97,8 @@ function renderrentdata(data) {
             if (movie.region == "US" && movie.type == "rent" && movie.web_url != undefined) { return true; }
         })
     console.log(rentaloptions);
-    /*Checks to make sure the Watchmode API has any RENTAL streaming options available for the chosen movie in its database*/
-    /*For example, Watchmode has the movie Bamboozled in its database, has an ID for it, you can buy or rent movie, but no subscription streaming links available*/
+    //Checks to make sure the Watchmode API has any RENTAL streaming options available for the chosen movie in its database//
+    //For example, Watchmode has the movie Bamboozled in its database, has an ID for it, you can buy or rent movie, but no subscription streaming links available//
     if (rentaloptions.length != 0) {
         rentaloptions.forEach(value => {
             var list2 = document.createElement("ul");
@@ -111,7 +111,7 @@ function renderrentdata(data) {
     } else {
         renterror.textContent = "No Rental Streaming Links Available"
     }
-}
+} 
 
 function renderbuydata(data) {
     var buyingoptions = data
@@ -119,8 +119,8 @@ function renderbuydata(data) {
             if (movie.region == "US" && movie.type == "buy" && movie.web_url != undefined) { return true; }
         })
     console.log(buyingoptions);
-    /*Checks to make sure the Watchmode API has any BUYING streaming options available for the chosen movie in its database*/
-    /*For example, Watchmode has the movie Bamboozled in its database, has an ID for it, you can buy or rent movie, but no subscription streaming links available*/
+    //Checks to make sure the Watchmode API has any BUYING streaming options available for the chosen movie in its database//
+    //For example, Watchmode has the movie Bamboozled in its database, has an ID for it, you can buy or rent movie, but no subscription streaming links available//
     if (buyingoptions.length != 0) {
         buyingoptions.forEach(value => {
             var list3 = document.createElement("ul");
@@ -135,6 +135,43 @@ function renderbuydata(data) {
     }
 }
 
+//Get a list of streaming sources from API (can filter via sub or free, etc) so you could grab a name of streaming service to correspond with streaming link (to make a button, perhaps)
+/*getsources()
+function getsources() {
+    fetch("https://watchmode.p.rapidapi.com/sources/?type=sub&regions=US", {
+        "method": "GET",
+        "headers": {
+            "regions": "US",
+            "x-rapidapi-host": "watchmode.p.rapidapi.com",
+            "x-rapidapi-key": "be9a60e677msh27b9eb97af299e8p1c5a0djsnb9ba03ed5bd6"
+        },
+    })
+        .then(response => response.json())
+        .then((data) => {
+            console.log(data)})
+        }*/
+
+        function getpicture(imdbID){
+            external_id=imdbID
+            apikey2="a5c09845f2af6ed970ae332ca8d551ec"
+            fetch(
+                `https://api.themoviedb.org/3/find/${external_id}?api_key=${apikey2}&language=en-US&external_source=imdb_id`)
+                .then(response => response.json())
+                .then((data) => {
+                    console.log(data);
+                    printpic(data)})
+            .catch(err => {
+                console.error(err);
+            });
+        }
+
+    function printpic(data){
+        var pic = document.createElement("img");
+    var path= data.movie_results[0].poster_path;
+    var imagelink= "https://image.tmdb.org/t/p/w200"+ path;
+    pic.src = imagelink;
+    moviebox.appendChild(pic)}
+        
 
 //Grabs the Title submitted by the user and gives it to getId function. Do we want to allow people to search for TV shows as well? If so, that may be a bit more complicated.
 formEl.addEventListener('submit', function (event) {
